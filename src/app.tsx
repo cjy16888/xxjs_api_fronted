@@ -1,15 +1,12 @@
 import Footer from '@/components/Footer';
 import { Question, SelectLang } from '@/components/RightContent';
 import { LinkOutlined } from '@ant-design/icons';
-import type { Settings as LayoutSettings } from '@ant-design/pro-components';
 import { SettingDrawer } from '@ant-design/pro-components';
 import type { RunTimeLayoutConfig } from '@umijs/max';
 import { history, Link } from '@umijs/max';
-import defaultSettings from '../config/defaultSettings';
 import { requestConfig } from './requestConfig';
-import { currentUser as queryCurrentUser } from './services/ant-design-pro/api';
 import React from 'react';
-import { AvatarDropdown, AvatarName } from './components/RightContent/AvatarDropdown';
+import {getLoginUserUsingGET} from "@/services/xxjs_backend/userController";
 const isDev = process.env.NODE_ENV === 'development';
 const loginPath = '/user/login';
 
@@ -18,58 +15,38 @@ const loginPath = '/user/login';
  * */
 //当用户首次访问页面的时候，通过这个方法进行获取用户信息
 //这里需要保存用户的状态，信息
-export async function getInitialState(): Promise<{
-  settings?: Partial<LayoutSettings>;
-  currentUser?: API.CurrentUser;
-  loading?: boolean;
-  fetchUserInfo?: () => Promise<API.CurrentUser | undefined>;
-}> {
-  const fetchUserInfo = async () => {
-    try {
-      const msg = await queryCurrentUser({
-        skipErrorHandler: true,
-      });
-      return msg.data;
-    } catch (error) {
-      history.push(loginPath);
-    }
-    return undefined;
-  };
-  // 如果不是登录页面，执行
-  const { location } = history;
-  if (location.pathname !== loginPath) {
-    const currentUser = await fetchUserInfo();
-    return {
-      fetchUserInfo,
-      currentUser,
-      settings: defaultSettings as Partial<LayoutSettings>,
-    };
+// Promise<InitialState> 代表返回的是一个promise对象，里面是一个InitialState对象,类似于java中的泛型，内部类
+export async function getInitialState(): Promise<InitialState>{
+  // 当页面首次加载时，获取要全局保存的数据，比如用户登录信息
+  // 定义一个全局变量，用来保存用户信息
+  const state: InitialState = {
+    loginUser: undefined,
   }
-  return {
-    fetchUserInfo,
-    settings: defaultSettings as Partial<LayoutSettings>,
-  };
+  try {
+    //这里是通过调用后端接口获取用户信息，写成我们自己的接口
+    const res = await getLoginUserUsingGET();
+    if (res.data) {
+      //这里是将用户信息保存到全局变量中
+      state.loginUser = res.data;
+    }
+  } catch (error) {
+    history.push(loginPath);
+  }
+  return state;
 }
 
 // ProLayout 支持的api https://procomponents.ant.design/components/layout
 export const layout: RunTimeLayoutConfig = ({ initialState, setInitialState }) => {
   return {
     actionsRender: () => [<Question key="doc" />, <SelectLang key="SelectLang" />],
-    avatarProps: {
-      src: initialState?.currentUser?.avatar,
-      title: <AvatarName />,
-      render: (_, avatarChildren) => {
-        return <AvatarDropdown>{avatarChildren}</AvatarDropdown>;
-      },
-    },
     waterMarkProps: {
-      content: initialState?.currentUser?.name,
+      content: initialState?.loginUser?.userName,
     },
     footerRender: () => <Footer />,
     onPageChange: () => {
       const { location } = history;
       // 如果没有登录，重定向到 login
-      if (!initialState?.currentUser && location.pathname !== loginPath) {
+      if (!initialState?.loginUser && location.pathname !== loginPath) {
         history.push(loginPath);
       }
     },

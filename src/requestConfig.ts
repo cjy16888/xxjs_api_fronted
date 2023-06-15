@@ -26,6 +26,8 @@ interface ResponseStructure {
  */
 export const requestConfig: RequestConfig = {
   baseURL: 'http://localhost:7529',
+  //开启跨域，携带cookie，这里的withCredentials是axios的配置项，可以保存用户的登录状态，不至于刷新页面就需要重新登录
+  withCredentials: true,
   // 错误处理： umi@3 的错误处理方案。
   errorConfig: {
     // 错误抛出
