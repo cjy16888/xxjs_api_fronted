@@ -25,6 +25,7 @@ interface ResponseStructure {
  * @doc https://umijs.org/docs/max/request#配置
  */
 export const requestConfig: RequestConfig = {
+  // 基础请求路径，访问后端接口的时候，会自动拼接上这个路径
   baseURL: 'http://localhost:7529',
   //开启跨域，携带cookie，这里的withCredentials是axios的配置项，可以保存用户的登录状态，不至于刷新页面就需要重新登录
   withCredentials: true,

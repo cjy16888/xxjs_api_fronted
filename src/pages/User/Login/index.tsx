@@ -93,7 +93,7 @@ const Login: React.FC = () => {
     try {
       // 登录
       //这是一个异步函数，等待返回结果，然后赋值给msg，调用userLoginUsingPOST函数，openai自动生成的接口
-      // 登录
+      // 登录, await等待返回结果，然后赋值给res，调用userLoginUsingPOST函数，openai自动生成的接口
       const res = await userLoginUsingPOST({
         ...values,
       });
