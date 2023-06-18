@@ -7,6 +7,6 @@ export default function access(initialState: InitialState  | undefined) {
   return {
     canUser: loginUser,
     //判断当前用户是否为管理员
-    canAdmin: loginUser.userRole === 'admin',
+    canAdmin: loginUser?.userRole === 'admin',
   };
 }
